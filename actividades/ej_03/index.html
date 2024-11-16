@@ -3,22 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Actividad #</title>
+    <title>Actividad #3</title>
     <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
     <header>
-        <h1>Actividad #</h1>
+        <h1>Actividad #3</h1>
     </header>
     <main>
+        <div class="card">
+            <h3><span id="temp"></span>Temperatura en °C</h3>
+            <h6 class="alert" id="alert">BUZZER ACTIVADO</h6>
+        </div>
+        <div class="card">
+            <h2>Selecciona valor de referencia</h2>
+            <h4>Cuando la temperatura real supere la indicada <br> por el slider, se activará un buzzer</h4>
+            <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+            <p>Valor: <span id="ref"></span> °C</p>
+        </div>
     </main>
     <footer>
         <p>Representación Frontal y Visual de Datos</p>
         <p>Computadoras de Aeronaves</p>
-        <p>Alumno XX</p>
+        <p>Alumno Díaz Melión Danilo</p>
         <p>Prof. Carlassara Fabrizio</p>
         <p id="fecha"></p>
     </footer>
-    <script src="scripts/base.js"></script>
+    <script src="script/base.js"></script>
+    <script src="script/scripts.js"></script>
 </body>
 </html>
