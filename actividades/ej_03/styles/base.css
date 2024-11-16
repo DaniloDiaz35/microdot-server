@@ -2,7 +2,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f8ff;
+    background-color: yellow;
     color: #000080;
 }
 
@@ -14,7 +14,7 @@ header {
 
 header h1 {
     margin: 0;
-    color: white;
+    color: yellow;
 }
 
 main {
@@ -23,7 +23,7 @@ main {
 
 footer {
     background-color: #176fc7;
-    color: white;
+    color: yellow;
     text-align: center;
     padding: 10px 0;
     position: fixed;
