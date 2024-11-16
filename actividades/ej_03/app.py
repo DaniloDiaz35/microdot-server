@@ -1,66 +1,52 @@
 # Aplicacion del servidor
-# Servidor para control de temperatura con Microdot
-from boot import do_connect
-from microdot import Microdot, send_file
-from machine import Pin, ADC
-import ds18x20
-import onewire
+from microdot import Microdot
+from microdot import send_file
+from machine import Pin
+import machine
+import onewire, ds18x20
 import time
+import ujson
 
-# Configuración de pines
-buzzer = Pin(14, Pin.OUT)  # Buzzer para alarmas
-sensor_pin = Pin(19)       # Pin del sensor de temperatura
-sensor_ds18b20 = ds18x20.DS18X20(onewire.OneWire(sensor_pin))
-
-# Variables de estado
-temperature_setpoint = 0   # Temperatura de referencia establecida por el usuario
-temperature_current = 24   # Temperatura inicial
-
-# Conexión Wi-Fi
-do_connect()
-
-# Inicialización de la aplicación Microdot
 app = Microdot()
+# the device is on GPIO12
+dat = machine.Pin(19)
+buzzer = machine.Pin(14, Pin.OUT)
 
-# Ruta principal: entrega la página HTML
+# create the onewire object
+ds = ds18x20.DS18X20(onewire.OneWire(dat))
+
+# scan for devices on the bus
+roms = ds.scan()
+
+setPoint = 15
+
 @app.route('/')
 async def index(request):
-    return send_file('index.html')
+    return send_file("index.html")
 
-# Ruta para archivos estáticos
 @app.route('/<dir>/<file>')
 async def static(request, dir, file):
-    return send_file("/{}/{}".format(dir, file))
+    return send_file('/' + dir + '/' + file)
 
-# Ruta para leer la temperatura actual del sensor
-@app.route('/sensors/ds18b20/read')
-async def read_temperature(request):
-    global sensor_ds18b20, temperature_current
-    sensor_ds18b20.convert_temp()
+@app.route('/temp')
+async def static(request):
+    global setPoint
+    ds.convert_temp()
     time.sleep_ms(750)
-    roms = sensor_ds18b20.scan()
-    if roms:
-        temperature_current = sensor_ds18b20.read_temp(roms[0])
-    return {'temperature': temperature_current}
-
-# Ruta para establecer el setpoint de temperatura
-@app.route('/setpoint/set/<int:value>')
-async def set_setpoint(request, value):
-    global temperature_setpoint, temperature_current
-    temperature_setpoint = value
-    # Verificar si la temperatura actual supera el setpoint
-    if temperature_current >= temperature_setpoint:
-        buzzer.on()
-        buzzer_state = 'On'
+    print (roms)
+    temp = ds.read_temp(roms[0])
+    if temp >= setPoint:
+        buzzer.value(1)
+        return ujson.dumps({"temperature": temp, "buzzer":1})
     else:
-        buzzer.off()
-        buzzer_state = 'Off'
-    return {'buzzer': buzzer_state}
+        buzzer.value(0)
+        return ujson.dumps({"temperature": temp, "buzzer":0})
+        
+@app.route('/update/ref/<int:ref>')
+async def static(request, ref):
+    print(ref)
+    global setPoint
+    setPoint = ref * 30 / 100
+    return ujson.dumps({"status": 1})
 
-# Ruta para consultar el estado del buzzer
-@app.route('/buzzer/status')
-async def buzzer_status(request):
-    return {'buzzer': 'On' if buzzer.value() else 'Off'}
-
-# Ejecutar el servidor en el puerto 80
 app.run(port=80)
